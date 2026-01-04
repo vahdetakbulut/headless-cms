@@ -5,13 +5,12 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ path: string[] }> }
+    { params }: { params: { path: string[] } }
 ) {
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { path } = await params;
-    const [model, id] = path;
+    const [model, id] = params.path;
     const prismaModel = (prisma as any)[model];
 
     if (!prismaModel) return new NextResponse("Model not found", { status: 404 });
@@ -33,13 +32,12 @@ export async function GET(
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: Promise<{ path: string[] }> }
+    { params }: { params: { path: string[] } }
 ) {
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { path } = await params;
-    const [model] = path;
+    const [model] = params.path;
     const prismaModel = (prisma as any)[model];
 
     if (!prismaModel) return new NextResponse("Model not found", { status: 404 });
@@ -56,13 +54,12 @@ export async function POST(
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: Promise<{ path: string[] }> }
+    { params }: { params: { path: string[] } }
 ) {
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { path } = await params;
-    const [model, id] = path;
+    const [model, id] = params.path;
     if (!id) return new NextResponse("ID required", { status: 400 });
 
     const prismaModel = (prisma as any)[model];
@@ -82,13 +79,12 @@ export async function PUT(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: Promise<{ path: string[] }> }
+    { params }: { params: { path: string[] } }
 ) {
     const session = await getServerSession(authOptions);
     if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { path } = await params;
-    const [model, id] = path;
+    const [model, id] = params.path;
     if (!id) return new NextResponse("ID required", { status: 400 });
 
     const prismaModel = (prisma as any)[model];
