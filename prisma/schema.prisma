@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum PageTemplate {
+  DEFAULT
+  CONTACT
+  ABOUT
+  FULL_WIDTH
+}
+
+enum MenuLocation {
+  HEADER
+  FOOTER
+  FOOTER_SERVICES
+  FOOTER_AREAS
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(EDITOR)
+  avatar        String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+}
+
+model Site {
+  id                    String    @id @default(cuid())
+  name                  String
+  slug                  String    @unique
+  domain                String?
+  logo_light            String?
+  logo_dark             String?
+  favicon               String?
+  phone                 String?
+  whatsapp              String?
+  email                 String?
+  address               String?
+  working_hours         String?
+  slogan                String?
+  google_analytics_id   String?
+  google_search_console String?
+  schema_business_type  String    @default("LocalBusiness")
+  schema_price_range    String?
+  social_facebook       String?
+  social_instagram      String?
+  social_twitter        String?
+  social_youtube        String?
+  social_linkedin       String?
+  maintenance_mode      Boolean   @default(false)
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  pages           Page[]
+  services        Service[]
+  service_areas   ServiceArea[]
+  blogs           Blog[]
+  blog_categories BlogCategory[]
+  faqs            FAQ[]
+  sliders         Slider[]
+  counters        Counter[]
+  menus           Menu[]
+  contacts        Contact[]
+  media           Media[]
+  team_members    TeamMember[]
+  testimonials    Testimonial[]
+  references      Reference[]
+  galleries       Gallery[]
+  video_galleries VideoGallery[]
+}
+
+model Page {
+  id               String       @id @default(cuid())
+  site_id          String
+  site             Site         @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title            String
+  slug             String
+  content          String       @db.Text
+  template         PageTemplate @default(DEFAULT)
+  meta_title       String?
+  meta_description String?
+  canonical_url    String?
+  robots           String       @default("index, follow")
+  og_image         String?
+  is_published     Boolean      @default(false)
+  order            Int          @default(0)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+
+  @@unique([site_id, slug])
+}
+
+model Service {
+  id                String   @id @default(cuid())
+  site_id           String
+  site              Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title             String
+  slug              String
+  short_description String?
+  content           String   @db.Text
+  icon              String?
+  image             String?
+  features          Json?
+  meta_title        String?
+  meta_description  String?
+  canonical_url     String?
+  robots            String   @default("index, follow")
+  og_image          String?
+  show_on_homepage  Boolean  @default(true)
+  is_published      Boolean  @default(false)
+  order             Int      @default(0)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@unique([site_id, slug])
+}
+
+model ServiceArea {
+  id               String   @id @default(cuid())
+  site_id          String
+  site             Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name             String
+  slug             String
+  city             String
+  description      String?  @db.Text
+  content          String?  @db.Text
+  image            String?
+  meta_title       String?
+  meta_description String?
+  canonical_url    String?
+  robots           String   @default("index, follow")
+  og_image         String?
+  is_published     Boolean  @default(false)
+  order            Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@unique([site_id, slug])
+}
+
+model Blog {
+  id               String    @id @default(cuid())
+  site_id          String
+  site             Site      @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title            String
+  slug             String
+  excerpt          String?   @db.Text
+  content          String    @db.Text
+  featured_image   String?
+  category_id      String?
+  category         BlogCategory? @relation(fields: [category_id], references: [id])
+  tags             Json?
+  author_id        String?
+  focus_keyword    String?
+  meta_title       String?
+  meta_description String?
+  canonical_url    String?
+  robots           String    @default("index, follow")
+  og_image         String?
+  is_featured      Boolean   @default(false)
+  is_published     Boolean   @default(false)
+  published_at     DateTime?
+  views            Int       @default(0)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  @@unique([site_id, slug])
+}
+
+model BlogCategory {
+  id               String   @id @default(cuid())
+  site_id          String
+  site             Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name             String
+  slug             String
+  description      String?  @db.Text
+  meta_title       String?
+  meta_description String?
+  order            Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  blogs            Blog[]
+
+  @@unique([site_id, slug])
+}
+
+model FAQ {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  question     String
+  answer       String   @db.Text
+  category     String?
+  service_id   String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model Slider {
+  id               String   @id @default(cuid())
+  site_id          String
+  site             Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title            String
+  subtitle         String?
+  description      String?  @db.Text
+  button_text      String?
+  button_link      String?
+  button2_text     String?
+  button2_link     String?
+  background_image String?
+  background_video String?
+  features         Json?
+  is_published     Boolean  @default(true)
+  order            Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Counter {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title        String
+  value        String
+  suffix       String?
+  prefix       String?
+  icon         String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model Menu {
+  id           String       @id @default(cuid())
+  site_id      String
+  site         Site         @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  location     MenuLocation
+  title        String
+  link         String?
+  target       String       @default("_self")
+  parent_id    String?
+  is_published Boolean      @default(true)
+  order        Int          @default(0)
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  site_id     String
+  site        Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name        String
+  email       String?
+  phone       String?
+  subject     String?
+  message     String   @db.Text
+  source_page String?
+  ip_address  String?
+  is_read     Boolean  @default(false)
+  is_starred  Boolean  @default(false)
+  notes       String?  @db.Text
+  created_at  DateTime @default(now())
+}
+
+model Media {
+  id            String   @id @default(cuid())
+  site_id       String
+  site          Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  filename      String
+  original_name String
+  url           String
+  mime_type     String
+  size          Int
+  width         Int?
+  height        Int?
+  alt_text      String?
+  folder        String   @default("general")
+  created_at    DateTime @default(now())
+}
+
+model TeamMember {
+  id              String   @id @default(cuid())
+  site_id         String
+  site            Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name            String
+  title           String?
+  bio             String?  @db.Text
+  image           String?
+  email           String?
+  phone           String?
+  social_linkedin String?
+  social_twitter  String?
+  is_published    Boolean  @default(true)
+  order           Int      @default(0)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name         String
+  title        String?
+  company      String?
+  content      String   @db.Text
+  rating       Int      @default(5)
+  image        String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model Reference {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  name         String
+  logo         String?
+  website      String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model Gallery {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title        String
+  description  String?  @db.Text
+  image        String
+  category     String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model VideoGallery {
+  id           String   @id @default(cuid())
+  site_id      String
+  site         Site     @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  title        String
+  description  String?  @db.Text
+  video_url    String
+  thumbnail    String?
+  is_published Boolean  @default(true)
+  order        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
